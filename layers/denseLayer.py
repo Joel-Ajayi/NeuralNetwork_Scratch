@@ -32,7 +32,7 @@ class Dense:
         self.prev_units = prev_units
         self.opt = optimizer
         
-        if self.activation in ['sigmoid', 'softmax']:
+        if self.activation in ['sigmoid']:
           # Xavier
           initializer = tf.keras.initializers.GlorotUniform()
         else:
@@ -51,7 +51,7 @@ class Dense:
           self.beta1 = tf.constant(0.9)
           self.dVw = tf.Variable(tf.zeros_like(self.w), trainable=False)
           if self.use_bias:
-            self.dVb = tf.Variable(tf.zeros_like(self.b), trainable=False), 
+            self.dVb = tf.Variable(tf.zeros_like(self.b), trainable=False)
         elif optimizer == "adam":
           self.beta1 = tf.constant(0.9)
           self.beta2 = tf.constant(0.999)
@@ -63,7 +63,7 @@ class Dense:
           self.dSw_c = tf.Variable(tf.zeros_like(self.w), trainable=False)
 
           if self.use_bias:
-            self.dVb = tf.Variable(tf.zeros_like(self.b), trainable=False, )
+            self.dVb = tf.Variable(tf.zeros_like(self.b), trainable=False)
             self.dVb_c = tf.Variable(tf.zeros_like(self.b), trainable=False)
 
             self.dSb = tf.Variable(tf.zeros_like(self.b), trainable=False)

@@ -5,7 +5,7 @@ import tensorflow as tf
 @tf.function
 def normalize_data(z, epsilon):
     mu = tf.reduce_mean(z, axis=1, keepdims=True)  # Mean across batch (axis 1)
-    var = tf.reduce_mean(tf.pow((z - mu), 2), axis=1, keepdims=True)  # Variance across batch (axis 1)
+    var = tf.reduce_mean((z - mu)**2, axis=1, keepdims=True)  # Variance across batch (axis 1)
     var_eps_sum = var + epsilon
     z_mu_diff = z - mu
     z_norm = z_mu_diff * tf.math.rsqrt(var_eps_sum)

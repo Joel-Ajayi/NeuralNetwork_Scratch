@@ -15,7 +15,7 @@ class Relu():
     
     @tf.function
     def forward(self, out_prev, eps:float, is_training=True):
-      out = tf.nn.leaky_relu(out_prev, self.alpha)
+      out = tf.nn.relu(out_prev)
       if is_training:
         self.out.assign(out)
 
@@ -23,7 +23,7 @@ class Relu():
     
     @tf.function
     def backward(self, dout):
-      dout_dout_prev = relu_gradient(self.out, self.alpha)
+      dout_dout_prev = relu_gradient(self.out)
       dout_prev = tf.multiply(dout, dout_dout_prev)
 
       return dout_prev

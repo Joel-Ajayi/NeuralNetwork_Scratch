@@ -12,27 +12,10 @@ class DataLoader:
     def __init__(self):
         pass
 
-    def load_mnist_dataset(self):
-        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-        shape = x_train.shape[1:]
-        x_train = x_train.reshape(x_train.shape[0], -1).T
-        x_test = x_test.reshape(x_test.shape[0], -1).T
-        # 0 - 10
-        y_train = np.eye(10)[y_train].T
-        y_test = np.eye(10)[y_test].T
-        return (
-            x_train[:, :1024] / 255.0,
-            y_train[:, :1024],
-            x_test / 255.0,
-            y_test,
-            np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
-            shape,
-        )
-
     def load_finger_signs_dataset(self):
         url = f"{base_url}/datasets/train_signs.h5"
         train_dataset = h5py.File(url, "r")
-        test_dataset = h5py.File("datasets/test_signs.h5", "r")
+        test_dataset = h5py.File(f"{base_url}/datasets/test_signs.h5", "r")
         x_train, y_train = np.array(train_dataset["train_set_x"]), np.array(
             train_dataset["train_set_y"]
         )
@@ -40,18 +23,16 @@ class DataLoader:
             test_dataset["test_set_y"]
         )
         shape = x_train.shape[1:]
-        x_train = x_train.reshape(x_train.shape[0], -1).T
-        x_test = x_test.reshape(x_test.shape[0], -1).T
+        x_train = x_train.copy() / 255.0
+        x_test = x_test.copy() / 255.0
         # 0-5
-        y_train = np.eye(6)[y_train].T
-        y_test = np.eye(6)[y_test].T
+        y_train = np.eye(6)[y_train]
+        y_test = np.eye(6)[y_test]
         return (
-            x_train / 255.0,
-            y_train,
-            x_test / 255.0,
-            y_test,
-            np.array([0, 1, 2, 3, 4, 5]),
+            tf.data.Dataset.from_tensor_slices((x_train, y_train)).shuffle(buffer_size=x_train.shape[0]),
+            tf.data.Dataset.from_tensor_slices((x_test, y_test)),
             shape,
+            np.array([0, 1, 2, 3, 4, 5]),
         )
 
     def load_cats_dataset(self):
@@ -80,19 +61,8 @@ class DataLoader:
         test_set_x = test_set_x_orig.copy()
 
         return (
-            tf.data.Dataset.from_tensor_slices((train_set_x,train_set_y)).shuffle(buffer_size=test_set_x.shape[0]),
+            tf.data.Dataset.from_tensor_slices((train_set_x,train_set_y)).shuffle(buffer_size=train_set_x.shape[0]),
             tf.data.Dataset.from_tensor_slices((test_set_x,test_set_y)),
             train_set_x_orig.shape[1:],
             classes,
         )
-
-    def load_football_dataset(self):
-        data = scipy.io.loadmat("datasets/data.mat")
-        train_X = data["X"].T
-        train_Y = data["y"].T
-        test_X = data["Xval"].T
-        test_Y = data["yval"].T
-
-        plt.scatter(train_X[0, :], train_X[1, :], c=train_Y, s=40, cmap=plt.cm.Spectral)
-
-        return train_X, train_Y, test_X, test_Y

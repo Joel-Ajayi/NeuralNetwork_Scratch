@@ -64,7 +64,7 @@ class NeuralNetwork:
       self.costs = []
 
       padding_values = (tf.constant(0, dtype=tf.uint8), tf.constant(0, dtype=tf.int64))
-      mini_batches = dataset.padded_batch(batch_size=self.batch_size, padded_shapes=([*self.x_shape], [self.y_shape]), padding_values=padding_values, drop_remainder=True).prefetch(tf.data.AUTOTUNE)
+      mini_batches = dataset.batch(self.batch_size, drop_remainder=True).prefetch(tf.data.AUTOTUNE)
 
       for i in range(epoch):
         self.cost_total = 0.0
@@ -203,7 +203,7 @@ class NeuralNetwork:
         # p -- predictions for the given dataset X
         out_prev = tf.transpose(tf.cast(tf.reshape(X, shape=[X.shape[0], -1]), tf.float32))
         
-        m = X.shape[1]
+        m = X.shape[0]
         for layer in self.layers:
             out_prev = layer.forward(out_prev, self.epsilon, False)
 
@@ -214,9 +214,10 @@ class NeuralNetwork:
         if activation == "sigmoid":
             p = tf.where(out_prev > 0.5, tf.ones_like(p), tf.zeros_like(p))
         elif activation == "softmax":
-          pred_max = tf.argmax(out_prev, axis=0) 
-          indices = tf.stack([pred_max, tf.range(m)], axis=1)  # Shape: [batch_size, 2]
-          p = tf.tensor_scatter_nd_update(p, indices, tf.ones([m])) 
+          pred_max = tf.argmax(out_prev, axis=0).numpy()
+          indices = tf.stack([pred_max, tf.range(m).numpy()])  # Shape: [batch_size, 2]
+          
+          p = tf.tensor_scatter_nd_update(p, tf.transpose(indices), tf.ones([m])) 
         else:
             pass
 
